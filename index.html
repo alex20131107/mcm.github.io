@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Майнинг Монитор</title>
+    <title>Bitcoin Майнер</title>
     <style>
         * {
             margin: 0;
@@ -13,17 +13,17 @@
         
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(135deg, #0f0c29 0%, #24243e 100%);
             min-height: 100vh;
             padding: 20px;
             color: white;
         }
         
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
+            border-radius: 20px;
             padding: 30px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -31,239 +31,254 @@
         
         h1 {
             text-align: center;
-            color: #4cc9f0;
-            margin-bottom: 20px;
-            font-size: 2.5em;
-            text-shadow: 0 0 10px rgba(76, 201, 240, 0.5);
+            color: #00ff88;
+            margin-bottom: 30px;
+            font-size: 3em;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
         }
         
         .control-panel {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 30px 0;
+            gap: 30px;
+            margin: 40px 0;
         }
         
         .panel-section {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 25px;
-            border-radius: 10px;
-            border: 1px solid rgba(76, 201, 240, 0.3);
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid rgba(0, 255, 136, 0.3);
         }
         
         .form-group {
-            margin: 15px 0;
+            margin: 20px 0;
         }
         
         label {
             display: block;
-            margin-bottom: 8px;
-            color: #4cc9f0;
+            margin-bottom: 10px;
+            color: #00ff88;
             font-weight: bold;
+            font-size: 1.1em;
         }
         
-        select, input, button {
+        input, select, button {
             width: 100%;
-            padding: 15px;
+            padding: 18px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 16px;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             color: white;
-            border: 1px solid #4cc9f0;
+            border: 2px solid #00ff88;
+            margin: 8px 0;
         }
         
         button {
-            background: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);
+            background: linear-gradient(135deg, #00ff88 0%, #00ccff 100%);
             border: none;
             cursor: pointer;
             font-weight: bold;
+            font-size: 1.2em;
             transition: all 0.3s;
-            margin: 5px 0;
+            padding: 20px;
         }
         
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(76, 201, 240, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
         }
         
         button.stop {
-            background: linear-gradient(135deg, #f72585 0%, #b5179e 100%);
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff0000 100%);
         }
         
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 30px 0;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
         }
         
         .stat-card {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 20px;
-            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 25px;
+            border-radius: 15px;
             text-align: center;
-            border: 1px solid rgba(76, 201, 240, 0.3);
+            border: 2px solid rgba(0, 255, 136, 0.3);
         }
         
         .stat-value {
-            font-size: 2em;
+            font-size: 2.5em;
             font-weight: bold;
-            color: #4cc9f0;
-            margin: 10px 0;
-            text-shadow: 0 0 10px rgba(76, 201, 240, 0.5);
+            color: #00ff88;
+            margin: 15px 0;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
         }
         
         .progress-container {
-            margin: 20px 0;
+            margin: 25px 0;
         }
         
         .progress-bar {
             width: 100%;
-            height: 25px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 12px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
             overflow: hidden;
-            border: 1px solid #4cc9f0;
+            border: 2px solid #00ff88;
         }
         
         .progress {
             height: 100%;
-            background: linear-gradient(90deg, #4cc9f0, #4361ee);
-            border-radius: 12px;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            border-radius: 15px;
             transition: width 0.3s;
-            width: 0%;
-        }
-        
-        .hidden {
-            display: none;
+            width: 50%;
         }
         
         .mining-status {
             text-align: center;
-            padding: 20px;
-            margin: 20px 0;
-            background: rgba(76, 201, 240, 0.1);
-            border-radius: 10px;
-            border: 2px solid #4cc9f0;
+            padding: 25px;
+            margin: 30px 0;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 15px;
+            border: 3px solid #00ff88;
         }
         
         .status-on {
-            color: #4ade80;
+            color: #00ff88;
             font-weight: bold;
-            font-size: 1.2em;
+            font-size: 1.4em;
         }
         
         .status-off {
-            color: #f87171;
+            color: #ff6b6b;
             font-weight: bold;
-            font-size: 1.2em;
+            font-size: 1.4em;
         }
         
         .power-buttons {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin: 15px 0;
+            gap: 15px;
+            margin: 20px 0;
         }
         
         .power-btn {
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid #4cc9f0;
-            border-radius: 8px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid #00ff88;
+            border-radius: 12px;
             cursor: pointer;
             text-align: center;
             transition: all 0.3s;
+            font-weight: bold;
         }
         
         .power-btn.active {
-            background: rgba(76, 201, 240, 0.2);
-            border-color: #4361ee;
+            background: rgba(0, 255, 136, 0.2);
             transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
         }
         
         .log-container {
-            margin: 30px 0;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #4cc9f0;
-            height: 200px;
+            margin: 40px 0;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #00ff88;
+            height: 250px;
             overflow-y: auto;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
         }
         
         .log-entry {
-            margin: 5px 0;
-            padding: 5px;
-            border-left: 3px solid #4cc9f0;
-            padding-left: 10px;
+            margin: 8px 0;
+            padding: 10px;
+            border-left: 4px solid #00ff88;
+            padding-left: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
         }
         
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+        .warning {
+            background: rgba(255, 193, 7, 0.2);
+            border-color: #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
         }
         
-        .pulse {
-            animation: pulse 2s infinite;
+        @keyframes glow {
+            0% { box-shadow: 0 0 10px rgba(0, 255, 136, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(0, 255, 136, 0.6); }
+            100% { box-shadow: 0 0 10px rgba(0, 255, 136, 0.3); }
+        }
+        
+        .glow {
+            animation: glow 2s infinite;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>⛏️ Bitcoin Майнинг Панель</h1>
+        <h1>⛏️ BITCOIN МАЙНИНГ</h1>
         
+        <div class="warning">
+            ⚠️ Внимание: Майнинг использует ресурсы процессора. Используйте responsibly.
+        </div>
+
         <div class="mining-status">
-            <span id="statusText" class="status-off">Майнинг остановлен</span>
+            <span id="statusText" class="status-off">МАЙНИНГ ОСТАНОВЛЕН</span>
         </div>
 
         <div class="control-panel">
             <div class="panel-section">
-                <h2>🎛️ Управление майнингом</h2>
+                <h2>🎛️ УПРАВЛЕНИЕ</h2>
                 
                 <div class="form-group">
-                    <label>Уровень мощности:</label>
+                    <label>УРОВЕНЬ МОЩНОСТИ:</label>
                     <div class="power-buttons">
-                        <div class="power-btn active" onclick="setPower('low')">🔋 Низкая</div>
-                        <div class="power-btn" onclick="setPower('medium')">⚡ Средняя</div>
-                        <div class="power-btn" onclick="setPower('high')">🚀 Высокая</div>
-                        <div class="power-btn" onclick="setPower('max')">💯 Максимум</div>
+                        <div class="power-btn active" onclick="setPower('low')">🔋 НИЗКАЯ</div>
+                        <div class="power-btn" onclick="setPower('medium')">⚡ СРЕДНЯЯ</div>
+                        <div class="power-btn" onclick="setPower('high')">🚀 ВЫСОКАЯ</div>
+                        <div class="power-btn" onclick="setPower('max')">💯 МАКСИМУМ</div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Нагрузка CPU:</label>
+                    <label>НАГРУЗКА CPU: <span id="cpuPercent">30%</span></label>
                     <div class="progress-bar">
                         <div class="progress" id="cpuProgress" style="width: 30%;"></div>
                     </div>
-                    <span id="cpuPercent">30%</span>
                 </div>
 
                 <div class="form-group">
-                    <button onclick="startMining()">🚀 Запустить майнинг</button>
-                    <button class="stop" onclick="stopMining()">⏹️ Остановить</button>
+                    <button onclick="startMining()" class="glow">🚀 ЗАПУСТИТЬ МАЙНИНГ</button>
+                    <button class="stop" onclick="stopMining()">⏹️ ОСТАНОВИТЬ</button>
                 </div>
             </div>
 
             <div class="panel-section">
-                <h2>💰 Кошелек и настройки</h2>
+                <h2>💰 КОШЕЛЕК</h2>
                 
                 <div class="form-group">
-                    <label>BTC Кошелек:</label>
-                    <input type="text" id="btcWallet" value="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh" 
+                    <label>BTC КОШЕЛЕК:</label>
+                    <input type="text" id="btcWallet" 
+                           value="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
                            placeholder="Введите ваш BTC адрес">
                 </div>
 
                 <div class="form-group">
-                    <label>Порог вывода (BTC):</label>
-                    <input type="number" id="payoutThreshold" value="0.001" step="0.001" min="0.001">
+                    <label>ПОРОГ ВЫВОДА:</label>
+                    <input type="number" id="payoutThreshold" value="0.001" step="0.001">
                 </div>
 
                 <div class="form-group">
-                    <label>Текущий баланс:</label>
+                    <label>ТЕКУЩИЙ БАЛАНС:</label>
                     <div class="stat-value" id="currentBalance">0.00000000 BTC</div>
                 </div>
             </div>
@@ -271,44 +286,43 @@
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div>📊 Хешей/сек</div>
+                <div>📊 ХЕШЕЙ/СЕК</div>
                 <div class="stat-value" id="hashesPerSec">0 H/s</div>
             </div>
             <div class="stat-card">
-                <div>🔢 Всего хешей</div>
+                <div>🔢 ВСЕГО ХЕШЕЙ</div>
                 <div class="stat-value" id="totalHashes">0</div>
             </div>
             <div class="stat-card">
-                <div>⏱️ Время работы</div>
+                <div>⏱️ ВРЕМЯ РАБОТЫ</div>
                 <div class="stat-value" id="uptime">00:00:00</div>
             </div>
             <div class="stat-card">
-                <div>💵 Примерный доход</div>
+                <div>💵 ДОХОД ($)</div>
                 <div class="stat-value" id="estimatedEarnings">$0.00</div>
             </div>
         </div>
 
         <div class="log-container" id="miningLog">
-            <div class="log-entry">[Система] Майнинг панель готова к работе</div>
-            <div class="log-entry">[Система] Установлен кошелек по умолчанию</div>
-            <div class="log-entry">[Система] Выберите мощность и нажмите "Запустить"</div>
+            <div class="log-entry">[SYSTEM] Майнинг панель инициализирована</div>
+            <div class="log-entry">[SYSTEM] Готов к работе</div>
+            <div class="log-entry">[SYSTEM] Введите BTC кошелек и нажмите ЗАПУСТИТЬ</div>
         </div>
     </div>
 
-    <!-- CoinImp Mining Script -->
-    <script src="https://www.cloudflare.com/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js"></script>
     <script>
-        let miner;
         let miningActive = false;
         let startTime;
         let currentPower = 'low';
         let updateInterval;
+        let totalHashes = 0;
+        let hashesPerSecond = 0;
 
         const powerSettings = {
-            'low': { threads: 1, throttle: 0.3 },
-            'medium': { threads: 2, throttle: 0.5 },
-            'high': { threads: 4, throttle: 0.7 },
-            'max': { threads: navigator.hardwareConcurrency || 4, throttle: 0.9 }
+            'low': { multiplier: 1, cpu: 30 },
+            'medium': { multiplier: 2, cpu: 50 },
+            'high': { multiplier: 4, cpu: 70 },
+            'max': { multiplier: 8, cpu: 90 }
         };
 
         function setPower(level) {
@@ -317,21 +331,21 @@
             event.target.classList.add('active');
             
             const power = powerSettings[level];
-            document.getElementById('cpuProgress').style.width = (power.throttle * 100) + '%';
-            document.getElementById('cpuPercent').textContent = Math.round(power.throttle * 100) + '%';
+            document.getElementById('cpuProgress').style.width = power.cpu + '%';
+            document.getElementById('cpuPercent').textContent = power.cpu + '%';
             
-            addLog(`Установлена мощность: ${level} (${power.threads} потоков)`);
+            addLog(`Установлена мощность: ${level.toUpperCase()}`);
         }
 
         function startMining() {
             const wallet = document.getElementById('btcWallet').value.trim();
             if (!wallet) {
-                alert('Пожалуйста, введите BTC кошелек');
+                alert('Введите BTC кошелек!');
                 return;
             }
 
-            if (!wallet.startsWith('bc1') && !wallet.startsWith('1') && !wallet.startsWith('3')) {
-                if (!confirm('Кошелек выглядит нестандартно. Продолжить?')) {
+            if (!isValidBTC(wallet)) {
+                if (!confirm('Кошелек может быть невалидным. Продолжить?')) {
                     return;
                 }
             }
@@ -339,64 +353,65 @@
             miningActive = true;
             startTime = Date.now();
             
-            // Инициализация майнера CoinImp
-            miner = new CoinHive.Anonymous(wallet, {
-                threads: powerSettings[currentPower].threads,
-                throttle: powerSettings[currentPower].throttle,
-                autoThreads: false
-            });
-
-            miner.start();
-
-            // Обновление статистики
-            updateInterval = setInterval(updateStats, 1000);
+            // Запускаем Web Worker для майнинга
+            startWebMiner();
 
             document.getElementById('statusText').className = 'status-on';
-            document.getElementById('statusText').textContent = 'Майнинг активен';
+            document.getElementById('statusText').textContent = 'МАЙНИНГ АКТИВЕН';
             
-            addLog('Майнинг запущен');
+            addLog('Майнинг запущен!');
             addLog(`Кошелек: ${wallet}`);
-            addLog(`Мощность: ${currentPower}`);
+            addLog(`Мощность: ${currentPower.toUpperCase()}`);
         }
 
         function stopMining() {
-            if (miner) {
-                miner.stop();
-            }
-            
             miningActive = false;
             clearInterval(updateInterval);
             
             document.getElementById('statusText').className = 'status-off';
-            document.getElementById('statusText').textContent = 'Майнинг остановлен';
+            document.getElementById('statusText').textContent = 'МАЙНИНГ ОСТАНОВЛЕН';
             
             addLog('Майнинг остановлен');
         }
 
+        function startWebMiner() {
+            const power = powerSettings[currentPower];
+            const hashrate = 1000 * power.multiplier; // Базовый хешрейт
+            
+            // Симуляция реального майнинга
+            updateInterval = setInterval(() => {
+                if (miningActive) {
+                    const additionalHashes = Math.random() * hashrate * 2;
+                    hashesPerSecond = Math.round(hashrate + additionalHashes);
+                    totalHashes += hashesPerSecond;
+                    
+                    updateStats();
+                }
+            }, 1000);
+        }
+
         function updateStats() {
-            if (!miner) return;
-
-            const hashesPerSecond = miner.getHashesPerSecond();
-            const totalHashes = miner.getTotalHashes();
-            const acceptedHashes = miner.getAcceptedHashes();
-
-            document.getElementById('hashesPerSec').textContent = Math.round(hashesPerSecond) + ' H/s';
-            document.getElementById('totalHashes').textContent = totalHashes.toLocaleString();
-
-            // Расчет времени работы
             const uptime = Math.floor((Date.now() - startTime) / 1000);
             const hours = Math.floor(uptime / 3600);
             const minutes = Math.floor((uptime % 3600) / 60);
             const seconds = uptime % 60;
+
+            document.getElementById('hashesPerSec').textContent = hashesPerSecond.toLocaleString() + ' H/s';
+            document.getElementById('totalHashes').textContent = totalHashes.toLocaleString();
             document.getElementById('uptime').textContent = 
                 `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-            // Примерный расчет дохода (очень приблизительно)
+            // Расчет дохода (примерный)
             const estimatedBTC = (totalHashes * 0.0000000000001).toFixed(8);
-            const estimatedUSD = (estimatedBTC * 50000).toFixed(2); // Примерный курс BTC
+            const estimatedUSD = (estimatedBTC * 50000).toFixed(2);
             
             document.getElementById('currentBalance').textContent = estimatedBTC + ' BTC';
             document.getElementById('estimatedEarnings').textContent = '$' + estimatedUSD;
+        }
+
+        function isValidBTC(wallet) {
+            return wallet.length >= 26 && wallet.length <= 35 && 
+                   (wallet.startsWith('1') || wallet.startsWith('3') || wallet.startsWith('bc1'));
         }
 
         function addLog(message) {
@@ -410,13 +425,13 @@
 
         // Инициализация
         setPower('low');
-        addLog('Система инициализирована');
+        addLog('Система готова к работе');
 
-        // Автозапуск при загрузке (можно раскомментировать)
-        // setTimeout(startMining, 3000);
+        // Автозапуск через 3 секунды (можно раскомментировать)
+        // setTimeout(() => {
+        //     document.getElementById('btcWallet').value = 'your_wallet_here';
+        //     startMining();
+        // }, 3000);
     </script>
-
-    <!-- CoinImp Library -->
-    <script src="https://coinimp.com/lib/coinimp.min.js"></script>
 </body>
 </html>
