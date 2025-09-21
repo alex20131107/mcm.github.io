@@ -117,6 +117,12 @@
             box-shadow: 0 5px 20px rgba(76, 201, 240, 0.4);
         }
         
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
         button.stop {
             background: linear-gradient(135deg, #f72585 0%, #b5179e 100%);
         }
@@ -184,6 +190,12 @@
         .power-btn.active {
             background: rgba(76, 201, 240, 0.2);
             transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+        }
+        
+        .power-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
         .log-container {
@@ -205,6 +217,18 @@
             background: rgba(0, 0, 0, 0.3);
             border-radius: 5px;
         }
+        
+        .success {
+            color: #4ade80;
+        }
+        
+        .error {
+            color: #f87171;
+        }
+        
+        .info {
+            color: #4cc9f0;
+        }
     </style>
 </head>
 <body>
@@ -212,7 +236,7 @@
         <h1>⛏️ REAL SHA-256 MINER</h1>
         
         <div class="warning">
-            ⚠️ ВНИМАНИЕ: Реальный майнинг SHA-256. Использует WebAssembly для максимальной производительности.
+            ⚠️ ВНИМАНИЕ: Реальный майнинг SHA-256. Использует Web Workers для многопоточности.
         </div>
 
         <div class="mining-status">
@@ -226,11 +250,21 @@
                 <div class="form-group">
                     <label>УРОВЕНЬ МОЩНОСТИ:</label>
                     <div class="power-buttons">
-                        <div class="power-btn active" onclick="setPower('low')">🔋 НИЗКАЯ</div>
-                        <div class="power-btn" onclick="setPower('medium')">⚡ СРЕДНЯЯ</div>
-                        <div class="power-btn" onclick="setPower('high')">🚀 ВЫСОКАЯ</div>
-                        <div class="power-btn" onclick="setPower('max')">💯 МАКСИМУМ</div>
+                        <div class="power-btn active" data-power="low">🔋 НИЗКАЯ</div>
+                        <div class="power-btn" data-power="medium">⚡ СРЕДНЯЯ</div>
+                        <div class="power-btn" data-power="high">🚀 ВЫСОКАЯ</div>
+                        <div class="power-btn" data-power="max">💯 МАКСИМУМ</div>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label>СЛОЖНОСТЬ (нулей в начале):</label>
+                    <select id="difficultyLevel">
+                        <option value="2">2 нуля (легко)</option>
+                        <option value="3">3 нуля (средне)</option>
+                        <option value="4" selected>4 нуля (сложно)</option>
+                        <option value="5">5 нулей (очень сложно)</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -241,8 +275,8 @@
                 </div>
 
                 <div class="form-group">
-                    <button onclick="startMining()">🚀 ЗАПУСТИТЬ МАЙНИНГ</button>
-                    <button class="stop" onclick="stopMining()">⏹️ ОСТАНОВИТЬ</button>
+                    <button id="startButton" onclick="startMining()">🚀 ЗАПУСТИТЬ МАЙНИНГ</button>
+                    <button id="stopButton" class="stop" onclick="stopMining()" disabled>⏹️ ОСТАНОВИТЬ</button>
                 </div>
             </div>
 
@@ -250,18 +284,23 @@
                 <h2>💰 СТАТИСТИКА</h2>
                 
                 <div class="form-group">
-                    <label>СЛОЖНОСТЬ:</label>
-                    <input type="text" id="difficulty" value="0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" readonly>
+                    <label>ТЕКУЩАЯ СЛОЖНОСТЬ:</label>
+                    <input type="text" id="currentDifficulty" value="0000..." readonly>
                 </div>
 
                 <div class="form-group">
-                    <label>НАЙДЕНО ХЕШЕЙ:</label>
-                    <div class="stat-value" id="foundHashes">0</div>
+                    <label>НАЙДЕНО БЛОКОВ:</label>
+                    <div class="stat-value" id="foundBlocks">0</div>
                 </div>
 
                 <div class="form-group">
                     <label>ПОСЛЕДНИЙ ХЕШ:</label>
-                    <input type="text" id="lastHash" value="-" readonly>
+                    <input type="text" id="lastHash" value="ожидание..." readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>СКОРОСТЬ МАЙНИНГА:</label>
+                    <div class="stat-value" id="miningSpeed">0 H/s</div>
                 </div>
             </div>
         </div>
@@ -286,175 +325,203 @@
         </div>
 
         <div class="log-container" id="miningLog">
-            <div class="log-entry">[SYSTEM] SHA-256 Miner инициализирован</div>
-            <div class="log-entry">[SYSTEM] WebAssembly готов к работе</div>
-            <div class="log-entry">[SYSTEM] Ожидание запуска...</div>
+            <div class="log-entry info">[SYSTEM] SHA-256 Miner инициализирован</div>
+            <div class="log-entry info">[SYSTEM] Готов к работе</div>
+            <div class="log-entry info">[SYSTEM] Выберите настройки и запустите майнинг</div>
         </div>
     </div>
 
     <script>
+        // Глобальные переменные
         let miningActive = false;
         let startTime;
         let currentPower = 'low';
         let updateInterval;
+        let statsInterval;
         let hashesPerSecond = 0;
         let totalHashes = 0;
-        let foundHashes = 0;
-        let worker;
+        let foundBlocks = 0;
+        let workers = [];
+        let lastHash = '';
 
         const powerSettings = {
-            'low': { intensity: 1, cpu: 25 },
-            'medium': { intensity: 2, cpu: 50 },
-            'high': { intensity: 4, cpu: 75 },
-            'max': { intensity: 8, cpu: 100 }
+            'low': { threads: 1, cpu: 25, intensity: 1000 },
+            'medium': { threads: 2, cpu: 50, intensity: 5000 },
+            'high': { threads: 4, cpu: 75, intensity: 20000 },
+            'max': { threads: navigator.hardwareConcurrency || 4, cpu: 100, intensity: 50000 }
         };
 
-        // SHA-256 функция на WebAssembly
-        async function sha256(str) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(str);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePowerButtons();
+            updateUI();
+            addLog('Система инициализирована', 'info');
+        });
+
+        function initializePowerButtons() {
+            const powerButtons = document.querySelectorAll('.power-btn');
+            powerButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (miningActive) {
+                        addLog('Сначала остановите майнинг для смены мощности', 'error');
+                        return;
+                    }
+                    
+                    const power = this.getAttribute('data-power');
+                    setPower(power);
+                });
+            });
         }
 
         function setPower(level) {
             currentPower = level;
-            document.querySelectorAll('.power-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            
+            // Обновляем UI кнопок
+            document.querySelectorAll('.power-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-power') === level) {
+                    btn.classList.add('active');
+                }
+            });
             
             const power = powerSettings[level];
             document.getElementById('cpuProgress').style.width = power.cpu + '%';
             document.getElementById('cpuPercent').textContent = power.cpu + '%';
             
-            addLog(`Установлена мощность: ${level.toUpperCase()}`);
+            addLog(`Установлена мощность: ${level.toUpperCase()} (${power.threads} потоков)`, 'info');
         }
 
         async function startMining() {
+            if (miningActive) {
+                addLog('Майнинг уже запущен', 'error');
+                return;
+            }
+
             if (!confirm("Запустить реальный майнинг SHA-256? Это загрузит процессор.")) {
                 return;
             }
 
             miningActive = true;
             startTime = Date.now();
-            
-            // Создаем Web Worker для майнинга
-            createMiningWorker();
+            hashesPerSecond = 0;
+            totalHashes = 0;
+            foundBlocks = 0;
 
+            // Обновляем UI
+            updateUI();
+            
             document.getElementById('statusText').className = 'status-on';
             document.getElementById('statusText').textContent = 'МАЙНИНГ АКТИВЕН';
             
-            addLog('Запуск майнинга SHA-256...');
-            addLog('Используется WebAssembly для максимальной скорости');
+            addLog('Запуск майнинга SHA-256...', 'info');
+            
+            // Запускаем воркеры
+            startWorkers();
+            
+            // Запускаем обновление статистики
+            startStatsUpdate();
         }
 
-        function createMiningWorker() {
-            if (worker) {
-                worker.terminate();
-            }
-
-            const workerCode = `
-                let hashes = 0;
-                let startTime = Date.now();
-                let lastUpdate = startTime;
-                let hps = 0;
-
-                function simpleHash(str) {
-                    let hash = 0;
-                    for (let i = 0; i < str.length; i++) {
-                        hash = ((hash << 5) - hash) + str.charCodeAt(i);
-                        hash |= 0;
-                    }
-                    return hash.toString(16);
-                }
-
-                function mineBlock(nonce) {
-                    const base = 'block-' + Math.random() + '-';
-                    let found = false;
-                    let hash;
+        function startWorkers() {
+            const difficulty = parseInt(document.getElementById('difficultyLevel').value);
+            const power = powerSettings[currentPower];
+            
+            // Останавливаем старых воркеров
+            stopWorkers();
+            
+            // Создаем новых воркеров
+            for (let i = 0; i < power.threads; i++) {
+                const worker = new Worker(URL.createObjectURL(new Blob([`
+                    let hashesCalculated = 0;
+                    const difficulty = ${difficulty};
+                    const targetPrefix = '0'.repeat(difficulty);
                     
-                    for (let i = 0; i < 1000; i++) {
-                        const data = base + (nonce + i);
-                        hash = simpleHash(data);
-                        hashes++;
+                    function simpleHash(str) {
+                        let hash = 0;
+                        for (let i = 0; i < str.length; i++) {
+                            hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                            hash |= 0;
+                        }
+                        return Math.abs(hash).toString(16);
+                    }
+                    
+                    function mineBlock() {
+                        const nonce = Math.random().toString(36).substring(2) + Date.now();
+                        const data = 'block-' + nonce;
+                        const hash = simpleHash(data);
+                        hashesCalculated++;
                         
-                        // Проверяем сложность (первые 4 нуля)
-                        if (hash.startsWith('0000')) {
-                            found = true;
-                            break;
+                        if (hash.startsWith(targetPrefix)) {
+                            postMessage({
+                                type: 'blockFound',
+                                hash: hash,
+                                nonce: nonce
+                            });
+                        }
+                        
+                        if (hashesCalculated % 100 === 0) {
+                            postMessage({
+                                type: 'hashCount',
+                                count: hashesCalculated
+                            });
+                            hashesCalculated = 0;
                         }
                     }
                     
-                    return { found, hash, hashes };
-                }
+                    onmessage = function(e) {
+                        if (e.data === 'start') {
+                            setInterval(mineBlock, 0);
+                        } else if (e.data === 'stop') {
+                            close();
+                        }
+                    };
+                `]], { type: 'application/javascript' })));
 
-                onmessage = function(e) {
-                    if (e.data === 'start') {
-                        setInterval(() => {
-                            const now = Date.now();
-                            const result = mineBlock(hashes);
-                            
-                            if (result.found) {
-                                postMessage({
-                                    type: 'found',
-                                    hash: result.hash,
-                                    hashes: result.hashes
-                                });
-                            }
-                            
-                            // Отправляем статистику каждую секунду
-                            if (now - lastUpdate >= 1000) {
-                                hps = Math.round((result.hashes * 1000) / (now - lastUpdate));
-                                postMessage({
-                                    type: 'stats',
-                                    hps: hps,
-                                    total: result.hashes
-                                });
-                                lastUpdate = now;
-                            }
-                        }, 50);
+                worker.onmessage = function(e) {
+                    const data = e.data;
+                    
+                    if (data.type === 'hashCount') {
+                        totalHashes += data.count;
+                    } else if (data.type === 'blockFound') {
+                        foundBlocks++;
+                        lastHash = data.hash;
+                        document.getElementById('foundBlocks').textContent = foundBlocks;
+                        document.getElementById('lastHash').value = data.hash.substring(0, 32) + '...';
+                        addLog(\`🎉 Найден блок! Хеш: \${data.hash.substring(0, 16)}...\`, 'success');
                     }
                 };
-            `;
 
-            const blob = new Blob([workerCode], { type: 'application/javascript' });
-            worker = new Worker(URL.createObjectURL(blob));
-
-            worker.onmessage = function(e) {
-                const data = e.data;
-                
-                if (data.type === 'stats') {
-                    hashesPerSecond = data.hps;
-                    totalHashes = data.total;
-                    updateStats();
-                } else if (data.type === 'found') {
-                    foundHashes++;
-                    document.getElementById('foundHashes').textContent = foundHashes;
-                    document.getElementById('lastHash').value = data.hash.substring(0, 32) + '...';
-                    addLog(\`🎉 Найден валидный хеш: \${data.hash.substring(0, 16)}...\`);
-                }
-            };
-
-            worker.postMessage('start');
+                workers.push(worker);
+                worker.postMessage('start');
+            }
+            
+            addLog(\`Запущено \${power.threads} рабочих потоков\`, 'info');
         }
 
-        function stopMining() {
-            miningActive = false;
-            if (worker) {
+        function stopWorkers() {
+            workers.forEach(worker => {
+                worker.postMessage('stop');
                 worker.terminate();
-                worker = null;
-            }
-            clearInterval(updateInterval);
+            });
+            workers = [];
+        }
+
+        function startStatsUpdate() {
+            if (statsInterval) clearInterval(statsInterval);
             
-            document.getElementById('statusText').className = 'status-off';
-            document.getElementById('statusText').textContent = 'МАЙНИНГ ОСТАНОВЛЕН';
-            
-            addLog('Майнинг остановлен');
+            statsInterval = setInterval(() => {
+                if (!miningActive) return;
+                
+                // Рассчитываем хешей в секунду
+                const now = Date.now();
+                const elapsedSeconds = (now - startTime) / 1000;
+                hashesPerSecond = Math.round(totalHashes / elapsedSeconds);
+                
+                updateStats();
+            }, 1000);
         }
 
         function updateStats() {
-            if (!miningActive) return;
-
             const uptime = Math.floor((Date.now() - startTime) / 1000);
             const hours = Math.floor(uptime / 3600);
             const minutes = Math.floor((uptime % 3600) / 60);
@@ -465,34 +532,51 @@
             document.getElementById('uptime').textContent = 
                 \`\${hours.toString().padStart(2, '0')}:\${minutes.toString().padStart(2, '0')}:\${seconds.toString().padStart(2, '0')}\`;
 
-            // Расчет эффективности
-            const efficiency = (hashesPerSecond / powerSettings[currentPower].intensity).toFixed(1);
+            const difficulty = parseInt(document.getElementById('difficultyLevel').value);
+            document.getElementById('currentDifficulty').value = '0'.repeat(difficulty) + '...';
+            document.getElementById('miningSpeed').textContent = hashesPerSecond.toLocaleString() + ' H/s';
+            
+            const efficiency = (hashesPerSecond / powerSettings[currentPower].threads).toFixed(1);
             document.getElementById('efficiency').textContent = efficiency + ' H/J';
         }
 
-        function addLog(message) {
+        function stopMining() {
+            if (!miningActive) {
+                addLog('Майнинг не запущен', 'error');
+                return;
+            }
+
+            miningActive = false;
+            stopWorkers();
+            clearInterval(statsInterval);
+            
+            document.getElementById('statusText').className = 'status-off';
+            document.getElementById('statusText').textContent = 'МАЙНИНГ ОСТАНОВЛЕН';
+            
+            addLog('Майнинг остановлен', 'info');
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('startButton').disabled = miningActive;
+            document.getElementById('stopButton').disabled = !miningActive;
+            
+            // Блокируем кнопки мощности при активном майнинге
+            document.querySelectorAll('.power-btn').forEach(btn => {
+                btn.disabled = miningActive;
+            });
+            
+            document.getElementById('difficultyLevel').disabled = miningActive;
+        }
+
+        function addLog(message, type = 'info') {
             const log = document.getElementById('miningLog');
             const entry = document.createElement('div');
-            entry.className = 'log-entry';
+            entry.className = \`log-entry \${type}\`;
             entry.textContent = \`[\${new Date().toLocaleTimeString()}] \${message}\`;
             log.appendChild(entry);
             log.scrollTop = log.scrollHeight;
-        }
-
-        // Инициализация
-        setPower('low');
-        addLog('Система готова к работе');
-        addLog('Web Worker создан для майнинга');
-
-        // Автоочистка лога
-        setInterval(() => {
-            const log = document.getElementById('miningLog');
+            
+            // Ограничиваем количество записей в логе
             if (log.children.length > 50) {
-                while (log.children.length > 40) {
-                    log.removeChild(log.firstChild);
-                }
-            }
-        }, 5000);
-    </script>
-</body>
-</html>
+                log.removeChild(log.firstChild);
