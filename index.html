@@ -1,70 +1,373 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Майнинг с согласия пользователя</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добровольный майнинг - Поддержка сайта</title>
     <style>
-        .consent-form {
-            padding: 20px;
-            border: 1px solid #ccc;
-            margin: 20px;
-            text-align: center;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .mining-status {
-            display: none;
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2.2em;
+        }
+        
+        .consent-form, .mining-panel, .wallet-info {
+            margin: 20px 0;
+            padding: 25px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #fafafa;
+        }
+        
+        .form-group {
+            margin: 15px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px 5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 2px solid #e0e0e0;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .power-levels {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .power-btn {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .power-btn:hover, .power-btn.active {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: scale(1.05);
+        }
+        
+        .wallet-address {
+            font-family: monospace;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        
+        .disclaimer {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
-    <div class="consent-form">
-        <h2>Участие в майнинге</h2>
-        <p>Хотите поддержать наш сайть, разрешив фоновый майнинг?</p>
-        <p>Это не повлияет на производительность вашего устройства</p>
-        <button onclick="startMining()">Разрешить майнинг</button>
-        <button onclick="declineMining()">Отказаться</button>
-    </div>
+    <div class="container">
+        <h1>💻 Добровольный майнинг для поддержки сайта</h1>
+        
+        <div class="disclaimer">
+            <strong>⚠️ Внимание:</strong> Это демонстрационная страница. Реальный майнинг в браузере 
+            требует специальных библиотек и явного согласия пользователя. Все действия производятся 
+            только с вашего разрешения.
+        </div>
 
-    <div class="mining-status" id="miningStatus">
-        <h3>Майнинг активен</h3>
-        <p>Хешей обработано: <span id="hashCount">0</span></p>
-        <button onclick="stopMining()">Остановить майнинг</button>
+        <div id="consentForm" class="consent-form">
+            <h2>🎯 Давайте начнем!</h2>
+            <p>Вы можете поддержать наш проект, разрешив использование части вычислительной мощности вашего устройства.</p>
+            
+            <div class="form-group">
+                <label>Выберите уровень мощности:</label>
+                <div class="power-levels">
+                    <div class="power-btn" onclick="selectPower('low')">
+                        <h3>🔋 Низкая</h3>
+                        <p>Минимальное влияние на устройство</p>
+                    </div>
+                    <div class="power-btn" onclick="selectPower('medium')">
+                        <h3>⚡ Средняя</h3>
+                        <p>Умеренное использование</p>
+                    </div>
+                    <div class="power-btn" onclick="selectPower('high')">
+                        <h3>🚀 Высокая</h3>
+                        <p>Максимальная производительность</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>BTC кошелек для поддержки:</label>
+                <input type="text" id="btcWallet" placeholder="Введите BTC адрес (опционально)" 
+                       value="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh">
+            </div>
+
+            <div style="text-align: center; margin: 25px 0;">
+                <button class="btn btn-primary" onclick="startMining()">✅ Начать майнинг</button>
+                <button class="btn btn-secondary" onclick="declineMining()">❌ Отказаться</button>
+            </div>
+        </div>
+
+        <div id="miningPanel" class="mining-panel hidden">
+            <h2>⛏️ Майнинг активен</h2>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div>📊 Хешей/сек</div>
+                    <div class="stat-value" id="hashesPerSecond">0</div>
+                </div>
+                <div class="stat-card">
+                    <div>🔢 Всего хешей</div>
+                    <div class="stat-value" id="totalHashes">0</div>
+                </div>
+                <div class="stat-card">
+                    <div>💰 Примерный доход</div>
+                    <div class="stat-value" id="estimatedEarnings">0 BTC</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Уровень мощности: <span id="currentPower">Средняя</span></label>
+                <div class="progress-bar">
+                    <div class="progress" id="powerProgress" style="width: 50%;"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Изменить мощность:</label>
+                <select id="powerSelector" onchange="changePower(this.value)">
+                    <option value="low">Низкая (25%)</option>
+                    <option value="medium" selected>Средняя (50%)</option>
+                    <option value="high">Высокая (75%)</option>
+                    <option value="max">Максимальная (100%)</option>
+                </select>
+            </div>
+
+            <div style="text-align: center; margin: 25px 0;">
+                <button class="btn btn-danger" onclick="stopMining()">⏹️ Остановить майнинг</button>
+            </div>
+        </div>
+
+        <div class="wallet-info">
+            <h2>💳 Информация о кошельке</h2>
+            <p>BTC адрес для поддержки:</p>
+            <div class="wallet-address" id="displayWallet">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</div>
+            <p><small>Все средства идут на поддержку и развитие проекта</small></p>
+        </div>
     </div>
 
     <script>
         let miningActive = false;
-        let hashCount = 0;
+        let totalHashes = 0;
+        let hashesPerSecond = 0;
+        let currentPower = 'medium';
+        let miningInterval;
+        let statsInterval;
+
+        const powerSettings = {
+            'low': { speed: 10, cpu: 25 },
+            'medium': { speed: 25, cpu: 50 },
+            'high': { speed: 50, cpu: 75 },
+            'max': { speed: 100, cpu: 100 }
+        };
+
+        function selectPower(level) {
+            currentPower = level;
+            document.querySelectorAll('.power-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        function changePower(level) {
+            if (miningActive) {
+                currentPower = level;
+                updateMiningSpeed();
+            }
+        }
 
         function startMining() {
-            if (!confirm("Вы разрешаете использование ресурсов вашего устройства для майнинга?")) {
+            if (!confirm("⚠️ Вы разрешаете использование ресурсов вашего устройства для майнинга?\n\nЭто может slightly увеличить нагрузку на процессор.")) {
                 return;
             }
-            
+
+            const wallet = document.getElementById('btcWallet').value;
+            if (wallet) {
+                document.getElementById('displayWallet').textContent = wallet;
+            }
+
             miningActive = true;
-            document.querySelector('.consent-form').style.display = 'none';
-            document.getElementById('miningStatus').style.display = 'block';
-            
-            // Симуляция майнинга (в реальности нужен специальный скрипт)
-            simulateMining();
+            document.getElementById('consentForm').classList.add('hidden');
+            document.getElementById('miningPanel').classList.remove('hidden');
+
+            updateMiningSpeed();
+            startMiningSimulation();
         }
 
         function stopMining() {
             miningActive = false;
-            document.getElementById('miningStatus').style.display = 'none';
-            document.querySelector('.consent-form').style.display = 'block';
+            clearInterval(miningInterval);
+            clearInterval(statsInterval);
+            
+            document.getElementById('miningPanel').classList.add('hidden');
+            document.getElementById('consentForm').classList.remove('hidden');
         }
 
         function declineMining() {
-            alert('Спасибо за честность!');
+            alert('Спасибо за посещение нашего сайта! 🙏');
         }
 
-        function simulateMining() {
-            if (!miningActive) return;
-            
-            hashCount++;
-            document.getElementById('hashCount').textContent = hashCount;
-            
-            setTimeout(simulateMining, 1000);
+        function updateMiningSpeed() {
+            const power = powerSettings[currentPower];
+            document.getElementById('currentPower').textContent = 
+                currentPower.charAt(0).toUpperCase() + currentPower.slice(1);
+            document.getElementById('powerProgress').style.width = power.cpu + '%';
         }
+
+        function startMiningSimulation() {
+            const power = powerSettings[currentPower];
+            
+            miningInterval = setInterval(() => {
+                if (miningActive) {
+                    totalHashes += power.speed;
+                    hashesPerSecond = power.speed;
+                }
+            }, 1000);
+
+            statsInterval = setInterval(() => {
+                if (miningActive) {
+                    document.getElementById('hashesPerSecond').textContent = 
+                        hashesPerSecond.toLocaleString() + '/s';
+                    document.getElementById('totalHashes').textContent = 
+                        totalHashes.toLocaleString();
+                    
+                    // Симуляция заработка (очень упрощенная)
+                    const estimatedBTC = (totalHashes * 0.000000000001).toFixed(12);
+                    document.getElementById('estimatedEarnings').textContent = 
+                        estimatedBTC + ' BTC';
+                }
+            }, 100);
+        }
+
+        // Инициализация
+        document.querySelectorAll('.power-btn')[1].classList.add('active');
     </script>
 </body>
 </html>
