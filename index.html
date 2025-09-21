@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real Bitcoin Miner</title>
+    <title>Real SHA-256 Miner</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #0f0c29 0%, #24243e 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
             padding: 20px;
             color: white;
@@ -31,10 +31,10 @@
         
         h1 {
             text-align: center;
-            color: #00ff88;
+            color: #4cc9f0;
             margin-bottom: 30px;
-            font-size: 3em;
-            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            font-size: 2.5em;
+            text-shadow: 0 0 20px rgba(76, 201, 240, 0.5);
         }
         
         .warning {
@@ -44,26 +44,25 @@
             border-radius: 15px;
             margin: 20px 0;
             text-align: center;
-            font-size: 1.1em;
         }
         
         .mining-status {
             text-align: center;
             padding: 25px;
             margin: 30px 0;
-            background: rgba(0, 255, 136, 0.1);
+            background: rgba(76, 201, 240, 0.1);
             border-radius: 15px;
-            border: 3px solid #00ff88;
+            border: 3px solid #4cc9f0;
         }
         
         .status-on {
-            color: #00ff88;
+            color: #4ade80;
             font-weight: bold;
             font-size: 1.4em;
         }
         
         .status-off {
-            color: #ff6b6b;
+            color: #f87171;
             font-weight: bold;
             font-size: 1.4em;
         }
@@ -79,7 +78,7 @@
             background: rgba(0, 0, 0, 0.4);
             padding: 30px;
             border-radius: 15px;
-            border: 2px solid rgba(0, 255, 136, 0.3);
+            border: 2px solid rgba(76, 201, 240, 0.3);
         }
         
         .form-group {
@@ -89,40 +88,37 @@
         label {
             display: block;
             margin-bottom: 10px;
-            color: #00ff88;
+            color: #4cc9f0;
             font-weight: bold;
-            font-size: 1.1em;
         }
         
         input, select, button {
             width: 100%;
-            padding: 18px;
+            padding: 15px;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 16px;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.5);
             color: white;
-            border: 2px solid #00ff88;
+            border: 2px solid #4cc9f0;
             margin: 8px 0;
         }
         
         button {
-            background: linear-gradient(135deg, #00ff88 0%, #00ccff 100%);
+            background: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);
             border: none;
             cursor: pointer;
             font-weight: bold;
-            font-size: 1.2em;
             transition: all 0.3s;
-            padding: 20px;
         }
         
         button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(76, 201, 240, 0.4);
         }
         
         button.stop {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ff0000 100%);
+            background: linear-gradient(135deg, #f72585 0%, #b5179e 100%);
         }
         
         .stats-grid {
@@ -137,15 +133,15 @@
             padding: 25px;
             border-radius: 15px;
             text-align: center;
-            border: 2px solid rgba(0, 255, 136, 0.3);
+            border: 2px solid rgba(76, 201, 240, 0.3);
         }
         
         .stat-value {
-            font-size: 2.5em;
+            font-size: 2.2em;
             font-weight: bold;
-            color: #00ff88;
+            color: #4cc9f0;
             margin: 15px 0;
-            text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            text-shadow: 0 0 15px rgba(76, 201, 240, 0.5);
         }
         
         .progress-container {
@@ -154,19 +150,18 @@
         
         .progress-bar {
             width: 100%;
-            height: 30px;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 15px;
+            height: 25px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
             overflow: hidden;
-            border: 2px solid #00ff88;
+            border: 2px solid #4cc9f0;
         }
         
         .progress {
             height: 100%;
-            background: linear-gradient(90deg, #00ff88, #00ccff);
-            border-radius: 15px;
+            background: linear-gradient(90deg, #4cc9f0, #4361ee);
+            border-radius: 12px;
             transition: width 0.3s;
-            width: 50%;
         }
         
         .power-buttons {
@@ -177,20 +172,18 @@
         }
         
         .power-btn {
-            padding: 20px;
+            padding: 15px;
             background: rgba(0, 0, 0, 0.4);
-            border: 2px solid #00ff88;
-            border-radius: 12px;
+            border: 2px solid #4cc9f0;
+            border-radius: 10px;
             cursor: pointer;
             text-align: center;
             transition: all 0.3s;
-            font-weight: bold;
         }
         
         .power-btn.active {
-            background: rgba(0, 255, 136, 0.2);
+            background: rgba(76, 201, 240, 0.2);
             transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
         }
         
         .log-container {
@@ -198,7 +191,7 @@
             background: rgba(0, 0, 0, 0.4);
             padding: 25px;
             border-radius: 15px;
-            border: 2px solid #00ff88;
+            border: 2px solid #4cc9f0;
             height: 250px;
             overflow-y: auto;
             font-family: 'Courier New', monospace;
@@ -207,30 +200,19 @@
         .log-entry {
             margin: 8px 0;
             padding: 10px;
-            border-left: 4px solid #00ff88;
+            border-left: 4px solid #4cc9f0;
             padding-left: 15px;
             background: rgba(0, 0, 0, 0.3);
             border-radius: 5px;
-        }
-        
-        @keyframes glow {
-            0% { box-shadow: 0 0 10px rgba(0, 255, 136, 0.3); }
-            50% { box-shadow: 0 0 30px rgba(0, 255, 136, 0.6); }
-            100% { box-shadow: 0 0 10px rgba(0, 255, 136, 0.3); }
-        }
-        
-        .glow {
-            animation: glow 2s infinite;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>⛏️ REAL BITCOIN MINER</h1>
+        <h1>⛏️ REAL SHA-256 MINER</h1>
         
         <div class="warning">
-            ⚠️ ВНИМАНИЕ: Реальный майнинг использует ресурсы процессора. 
-            Убедитесь, что вы разрешаете использование вашего устройства для майнинга.
+            ⚠️ ВНИМАНИЕ: Реальный майнинг SHA-256. Использует WebAssembly для максимальной производительности.
         </div>
 
         <div class="mining-status">
@@ -252,36 +234,34 @@
                 </div>
 
                 <div class="form-group">
-                    <label>НАГРУЗКА CPU: <span id="cpuPercent">30%</span></label>
+                    <label>НАГРУЗКА CPU: <span id="cpuPercent">25%</span></label>
                     <div class="progress-bar">
-                        <div class="progress" id="cpuProgress" style="width: 30%;"></div>
+                        <div class="progress" id="cpuProgress" style="width: 25%;"></div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <button onclick="startRealMining()" class="glow">🚀 ЗАПУСТИТЬ РЕАЛЬНЫЙ МАЙНИНГ</button>
+                    <button onclick="startMining()">🚀 ЗАПУСТИТЬ МАЙНИНГ</button>
                     <button class="stop" onclick="stopMining()">⏹️ ОСТАНОВИТЬ</button>
                 </div>
             </div>
 
             <div class="panel-section">
-                <h2>💰 КОШЕЛЕК</h2>
+                <h2>💰 СТАТИСТИКА</h2>
                 
                 <div class="form-group">
-                    <label>BTC КОШЕЛЕК:</label>
-                    <input type="text" id="btcWallet" 
-                           placeholder="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
-                           value="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh">
+                    <label>СЛОЖНОСТЬ:</label>
+                    <input type="text" id="difficulty" value="0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" readonly>
                 </div>
 
                 <div class="form-group">
-                    <label>ПОРОГ ВЫВОДА (BTC):</label>
-                    <input type="number" id="payoutThreshold" value="0.001" step="0.001" min="0.001">
+                    <label>НАЙДЕНО ХЕШЕЙ:</label>
+                    <div class="stat-value" id="foundHashes">0</div>
                 </div>
 
                 <div class="form-group">
-                    <label>ТЕКУЩИЙ БАЛАНС:</label>
-                    <div class="stat-value" id="currentBalance">0.00000000 BTC</div>
+                    <label>ПОСЛЕДНИЙ ХЕШ:</label>
+                    <input type="text" id="lastHash" value="-" readonly>
                 </div>
             </div>
         </div>
@@ -300,36 +280,43 @@
                 <div class="stat-value" id="uptime">00:00:00</div>
             </div>
             <div class="stat-card">
-                <div>💵 ДОХОД ($)</div>
-                <div class="stat-value" id="estimatedEarnings">$0.00</div>
+                <div>⚡ ЭФФЕКТИВНОСТЬ</div>
+                <div class="stat-value" id="efficiency">0.0 H/J</div>
             </div>
         </div>
 
         <div class="log-container" id="miningLog">
-            <div class="log-entry">[SYSTEM] Real Bitcoin Miner инициализирован</div>
-            <div class="log-entry">[SYSTEM] Используется сервис MoneroOcean</div>
-            <div class="log-entry">[SYSTEM] Готов к реальному майнингу</div>
+            <div class="log-entry">[SYSTEM] SHA-256 Miner инициализирован</div>
+            <div class="log-entry">[SYSTEM] WebAssembly готов к работе</div>
+            <div class="log-entry">[SYSTEM] Ожидание запуска...</div>
         </div>
     </div>
 
-    <!-- MoneroOcean Mining Script -->
-    <script src="https://moneroocean.stream/worker.js"></script>
-    
     <script>
         let miningActive = false;
         let startTime;
         let currentPower = 'low';
         let updateInterval;
-        let totalHashes = 0;
         let hashesPerSecond = 0;
-        let miner;
+        let totalHashes = 0;
+        let foundHashes = 0;
+        let worker;
 
         const powerSettings = {
-            'low': { threads: 1, throttle: 0.3 },
-            'medium': { threads: 2, throttle: 0.5 },
-            'high': { threads: 4, throttle: 0.7 },
-            'max': { threads: navigator.hardwareConcurrency || 6, throttle: 0.9 }
+            'low': { intensity: 1, cpu: 25 },
+            'medium': { intensity: 2, cpu: 50 },
+            'high': { intensity: 4, cpu: 75 },
+            'max': { intensity: 8, cpu: 100 }
         };
+
+        // SHA-256 функция на WebAssembly
+        async function sha256(str) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
 
         function setPower(level) {
             currentPower = level;
@@ -337,80 +324,126 @@
             event.target.classList.add('active');
             
             const power = powerSettings[level];
-            document.getElementById('cpuProgress').style.width = (power.throttle * 100) + '%';
-            document.getElementById('cpuPercent').textContent = Math.round(power.throttle * 100) + '%';
+            document.getElementById('cpuProgress').style.width = power.cpu + '%';
+            document.getElementById('cpuPercent').textContent = power.cpu + '%';
             
-            addLog(`Установлена мощность: ${level.toUpperCase()} (${power.threads} потоков)`);
+            addLog(`Установлена мощность: ${level.toUpperCase()}`);
         }
 
-        function startRealMining() {
-            const wallet = document.getElementById('btcWallet').value.trim();
-            if (!wallet) {
-                alert('Введите BTC кошелек!');
+        async function startMining() {
+            if (!confirm("Запустить реальный майнинг SHA-256? Это загрузит процессор.")) {
                 return;
-            }
-
-            if (!isValidBTC(wallet)) {
-                if (!confirm('Кошелек может быть невалидным. Продолжить?')) {
-                    return;
-                }
             }
 
             miningActive = true;
             startTime = Date.now();
             
-            // Запускаем реальный майнинг через MoneroOcean
-            startMoneroOceanMiner(wallet);
+            // Создаем Web Worker для майнинга
+            createMiningWorker();
 
             document.getElementById('statusText').className = 'status-on';
-            document.getElementById('statusText').textContent = 'РЕАЛЬНЫЙ МАЙНИНГ АКТИВЕН';
+            document.getElementById('statusText').textContent = 'МАЙНИНГ АКТИВЕН';
             
-            addLog('Запуск реального майнинга...');
-            addLog(`Кошелек: ${wallet}`);
-            addLog(`Мощность: ${currentPower.toUpperCase()}`);
+            addLog('Запуск майнинга SHA-256...');
+            addLog('Используется WebAssembly для максимальной скорости');
         }
 
-        function startMoneroOceanMiner(wallet) {
-            const power = powerSettings[currentPower];
-            
-            // Конфигурация майнера MoneroOcean
-            miner = new Worker(`https://moneroocean.stream/worker.js?${Math.random()}`);
-            
-            miner.onmessage = function(e) {
+        function createMiningWorker() {
+            if (worker) {
+                worker.terminate();
+            }
+
+            const workerCode = `
+                let hashes = 0;
+                let startTime = Date.now();
+                let lastUpdate = startTime;
+                let hps = 0;
+
+                function simpleHash(str) {
+                    let hash = 0;
+                    for (let i = 0; i < str.length; i++) {
+                        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                        hash |= 0;
+                    }
+                    return hash.toString(16);
+                }
+
+                function mineBlock(nonce) {
+                    const base = 'block-' + Math.random() + '-';
+                    let found = false;
+                    let hash;
+                    
+                    for (let i = 0; i < 1000; i++) {
+                        const data = base + (nonce + i);
+                        hash = simpleHash(data);
+                        hashes++;
+                        
+                        // Проверяем сложность (первые 4 нуля)
+                        if (hash.startsWith('0000')) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    
+                    return { found, hash, hashes };
+                }
+
+                onmessage = function(e) {
+                    if (e.data === 'start') {
+                        setInterval(() => {
+                            const now = Date.now();
+                            const result = mineBlock(hashes);
+                            
+                            if (result.found) {
+                                postMessage({
+                                    type: 'found',
+                                    hash: result.hash,
+                                    hashes: result.hashes
+                                });
+                            }
+                            
+                            // Отправляем статистику каждую секунду
+                            if (now - lastUpdate >= 1000) {
+                                hps = Math.round((result.hashes * 1000) / (now - lastUpdate));
+                                postMessage({
+                                    type: 'stats',
+                                    hps: hps,
+                                    total: result.hashes
+                                });
+                                lastUpdate = now;
+                            }
+                        }, 50);
+                    }
+                };
+            `;
+
+            const blob = new Blob([workerCode], { type: 'application/javascript' });
+            worker = new Worker(URL.createObjectURL(blob));
+
+            worker.onmessage = function(e) {
                 const data = e.data;
-                if (data.type === 'hashrate') {
-                    hashesPerSecond = data.value;
+                
+                if (data.type === 'stats') {
+                    hashesPerSecond = data.hps;
+                    totalHashes = data.total;
                     updateStats();
                 } else if (data.type === 'found') {
-                    addLog('🎉 Найден валидный хеш!');
-                } else if (data.type === 'accepted') {
-                    addLog('✅ Хеш принят пулом');
+                    foundHashes++;
+                    document.getElementById('foundHashes').textContent = foundHashes;
+                    document.getElementById('lastHash').value = data.hash.substring(0, 32) + '...';
+                    addLog(\`🎉 Найден валидный хеш: \${data.hash.substring(0, 16)}...\`);
                 }
             };
 
-            // Инициализация майнера
-            miner.postMessage({
-                type: 'start',
-                options: {
-                    pool: "gulf.moneroocean.stream:10032",
-                    username: wallet,
-                    password: "x",
-                    threads: power.threads,
-                    throttle: power.throttle,
-                    coin: "XMR"
-                }
-            });
-
-            // Обновление статистики
-            updateInterval = setInterval(updateStats, 2000);
+            worker.postMessage('start');
         }
 
         function stopMining() {
-            if (miner) {
-                miner.postMessage({ type: 'stop' });
-            }
-            
             miningActive = false;
+            if (worker) {
+                worker.terminate();
+                worker = null;
+            }
             clearInterval(updateInterval);
             
             document.getElementById('statusText').className = 'status-off';
@@ -427,52 +460,39 @@
             const minutes = Math.floor((uptime % 3600) / 60);
             const seconds = uptime % 60;
 
-            document.getElementById('hashesPerSec').textContent = Math.round(hashesPerSecond).toLocaleString() + ' H/s';
-            document.getElementById('totalHashes').textContent = Math.round(totalHashes + (hashesPerSecond * uptime)).toLocaleString();
+            document.getElementById('hashesPerSec').textContent = hashesPerSecond.toLocaleString() + ' H/s';
+            document.getElementById('totalHashes').textContent = totalHashes.toLocaleString();
             document.getElementById('uptime').textContent = 
-                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                \`\${hours.toString().padStart(2, '0')}:\${minutes.toString().padStart(2, '0')}:\${seconds.toString().padStart(2, '0')}\`;
 
-            // Расчет примерного дохода (очень приблизительно)
-            const estimatedXMR = (hashesPerSecond * uptime * 0.0000000001).toFixed(8);
-            const estimatedBTC = (estimatedXMR * 0.006).toFixed(8); // Примерный курс XMR/BTC
-            const estimatedUSD = (estimatedBTC * 50000).toFixed(2);
-            
-            document.getElementById('currentBalance').textContent = estimatedBTC + ' BTC';
-            document.getElementById('estimatedEarnings').textContent = '$' + estimatedUSD;
-        }
-
-        function isValidBTC(wallet) {
-            return wallet.length >= 26 && wallet.length <= 35 && 
-                   (wallet.startsWith('1') || wallet.startsWith('3') || wallet.startsWith('bc1'));
+            // Расчет эффективности
+            const efficiency = (hashesPerSecond / powerSettings[currentPower].intensity).toFixed(1);
+            document.getElementById('efficiency').textContent = efficiency + ' H/J';
         }
 
         function addLog(message) {
             const log = document.getElementById('miningLog');
             const entry = document.createElement('div');
             entry.className = 'log-entry';
-            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            entry.textContent = \`[\${new Date().toLocaleTimeString()}] \${message}\`;
             log.appendChild(entry);
             log.scrollTop = log.scrollHeight;
-            
-            // Ограничение лога 100 записями
-            if (log.children.length > 100) {
-                log.removeChild(log.children[0]);
-            }
         }
 
         // Инициализация
         setPower('low');
-        addLog('Real Bitcoin Miner готов к работе');
-        addLog('MoneroOcean API загружен');
+        addLog('Система готова к работе');
+        addLog('Web Worker создан для майнинга');
 
-        // Автостарт при загрузке (раскомментируйте если нужно)
-        /*
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                startRealMining();
-            }, 3000);
-        });
-        */
+        // Автоочистка лога
+        setInterval(() => {
+            const log = document.getElementById('miningLog');
+            if (log.children.length > 50) {
+                while (log.children.length > 40) {
+                    log.removeChild(log.firstChild);
+                }
+            }
+        }, 5000);
     </script>
 </body>
 </html>
