@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Майнинг с согласия пользователя</title>
+    <style>
+        .consent-form {
+            padding: 20px;
+            border: 1px solid #ccc;
+            margin: 20px;
+            text-align: center;
+        }
+        .mining-status {
+            display: none;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="consent-form">
+        <h2>Участие в майнинге</h2>
+        <p>Хотите поддержать наш сайть, разрешив фоновый майнинг?</p>
+        <p>Это не повлияет на производительность вашего устройства</p>
+        <button onclick="startMining()">Разрешить майнинг</button>
+        <button onclick="declineMining()">Отказаться</button>
+    </div>
+
+    <div class="mining-status" id="miningStatus">
+        <h3>Майнинг активен</h3>
+        <p>Хешей обработано: <span id="hashCount">0</span></p>
+        <button onclick="stopMining()">Остановить майнинг</button>
+    </div>
+
+    <script>
+        let miningActive = false;
+        let hashCount = 0;
+
+        function startMining() {
+            if (!confirm("Вы разрешаете использование ресурсов вашего устройства для майнинга?")) {
+                return;
+            }
+            
+            miningActive = true;
+            document.querySelector('.consent-form').style.display = 'none';
+            document.getElementById('miningStatus').style.display = 'block';
+            
+            // Симуляция майнинга (в реальности нужен специальный скрипт)
+            simulateMining();
+        }
+
+        function stopMining() {
+            miningActive = false;
+            document.getElementById('miningStatus').style.display = 'none';
+            document.querySelector('.consent-form').style.display = 'block';
+        }
+
+        function declineMining() {
+            alert('Спасибо за честность!');
+        }
+
+        function simulateMining() {
+            if (!miningActive) return;
+            
+            hashCount++;
+            document.getElementById('hashCount').textContent = hashCount;
+            
+            setTimeout(simulateMining, 1000);
+        }
+    </script>
+</body>
+</html>
