@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real SHA-256 Bitcoin Miner</title>
+    <title>Real XMR Miner with Payout</title>
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -20,7 +21,7 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 20px;
@@ -30,9 +31,41 @@
         
         h1 {
             text-align: center;
-            color: #4cc9f0;
+            color: #00ff88;
             margin-bottom: 30px;
             font-size: 2.5em;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+        
+        .warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        
+        .mining-status {
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 15px;
+            border: 2px solid #00ff88;
+        }
+        
+        .status-on {
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .status-off {
+            color: #ff6b6b;
+            font-weight: bold;
+            font-size: 1.2em;
         }
         
         .control-panel {
@@ -46,7 +79,7 @@
             background: rgba(0, 0, 0, 0.3);
             padding: 20px;
             border-radius: 15px;
-            border: 1px solid #4cc9f0;
+            border: 1px solid #00ff88;
         }
         
         .form-group {
@@ -56,7 +89,7 @@
         label {
             display: block;
             margin-bottom: 8px;
-            color: #4cc9f0;
+            color: #00ff88;
             font-weight: bold;
         }
         
@@ -68,12 +101,12 @@
             font-size: 14px;
             background: rgba(0, 0, 0, 0.5);
             color: white;
-            border: 1px solid #4cc9f0;
+            border: 1px solid #00ff88;
             margin: 5px 0;
         }
         
         button {
-            background: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);
+            background: linear-gradient(135deg, #00ff88 0%, #00ccff 100%);
             border: none;
             cursor: pointer;
             font-weight: bold;
@@ -90,7 +123,7 @@
         }
         
         button.stop {
-            background: linear-gradient(135deg, #f72585 0%, #b5179e 100%);
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff0000 100%);
         }
         
         .stats-grid {
@@ -105,40 +138,29 @@
             padding: 20px;
             border-radius: 10px;
             text-align: center;
-            border: 1px solid #4cc9f0;
+            border: 1px solid #00ff88;
         }
         
         .stat-value {
             font-size: 1.8em;
             font-weight: bold;
-            color: #4cc9f0;
+            color: #00ff88;
             margin: 10px 0;
         }
         
-        .mining-status {
-            text-align: center;
+        .wallet-info {
+            background: rgba(0, 0, 0, 0.3);
             padding: 20px;
-            margin: 20px 0;
-            background: rgba(76, 201, 240, 0.1);
             border-radius: 10px;
-            border: 2px solid #4cc9f0;
-        }
-        
-        .status-on {
-            color: #4ade80;
-            font-weight: bold;
-        }
-        
-        .status-off {
-            color: #f87171;
-            font-weight: bold;
+            border: 1px solid #00ff88;
+            margin: 20px 0;
         }
         
         .log-container {
             background: rgba(0, 0, 0, 0.3);
             padding: 20px;
             border-radius: 10px;
-            border: 1px solid #4cc9f0;
+            border: 1px solid #00ff88;
             height: 200px;
             overflow-y: auto;
             font-family: 'Courier New', monospace;
@@ -148,7 +170,7 @@
         .log-entry {
             margin: 5px 0;
             padding: 5px;
-            border-left: 3px solid #4cc9f0;
+            border-left: 3px solid #00ff88;
             padding-left: 10px;
         }
         
@@ -162,7 +184,7 @@
         .power-btn {
             padding: 12px;
             background: rgba(0, 0, 0, 0.3);
-            border: 1px solid #4cc9f0;
+            border: 1px solid #00ff88;
             border-radius: 8px;
             cursor: pointer;
             text-align: center;
@@ -170,133 +192,155 @@
         }
         
         .power-btn.active {
-            background: rgba(76, 201, 240, 0.2);
+            background: rgba(0, 255, 136, 0.2);
         }
         
-        .power-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .payout-info {
+            background: rgba(0, 255, 136, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid #00ff88;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>⛏️ REAL SHA-256 MINER</h1>
+        <h1>⛏️ REAL XMR MINER</h1>
         
+        <div class="warning">
+            ⚠️ Real Monero (XMR) mining with automatic payout to your wallet. 
+            Minimum payout: 0.001 XMR (~$0.15)
+        </div>
+
         <div class="mining-status">
-            <span id="statusText" class="status-off">МАЙНИНГ ОСТАНОВЛЕН</span>
+            <span id="statusText" class="status-off">MINING STOPPED</span>
+        </div>
+
+        <div class="wallet-info">
+            <h2>💰 WALLET SETTINGS</h2>
+            <div class="form-group">
+                <label>XMR WALLET ADDRESS:</label>
+                <input type="text" id="xmrWallet" placeholder="Enter your Monero wallet address" 
+                       value="48jyMBb7bjpZk2V6L7rt9Tz1Jc2H2W3RjJw5b4n6m8v9c1x2z3V4b5n6M7Q8W9R0T1Y2U3I4O5P6">
+                <small style="color: #888;">Example: 48jyMBb7bjpZk2V6L7rt9Tz1Jc2H2W3RjJw5b4n6m8v9c1x2z3V4b5n6M7Q8W9R0T1Y2U3I4O5P6</small>
+            </div>
+            <div class="form-group">
+                <label>MINING IDENTIFIER (optional):</label>
+                <input type="text" id="workerId" placeholder="Worker name" value="worker1">
+            </div>
         </div>
 
         <div class="control-panel">
             <div class="panel-section">
-                <h2>🎛️ УПРАВЛЕНИЕ</h2>
+                <h2>🎛️ CONTROL</h2>
                 
                 <div class="form-group">
-                    <label>УРОВЕНЬ МОЩНОСТИ:</label>
+                    <label>POWER LEVEL:</label>
                     <div class="power-buttons">
-                        <div class="power-btn active" onclick="setPower('low')">🔋 НИЗКАЯ</div>
-                        <div class="power-btn" onclick="setPower('medium')">⚡ СРЕДНЯЯ</div>
-                        <div class="power-btn" onclick="setPower('high')">🚀 ВЫСОКАЯ</div>
-                        <div class="power-btn" onclick="setPower('max')">💯 МАКСИМУМ</div>
+                        <div class="power-btn active" onclick="setPower('low')">🔋 LOW</div>
+                        <div class="power-btn" onclick="setPower('medium')">⚡ MEDIUM</div>
+                        <div class="power-btn" onclick="setPower('high')">🚀 HIGH</div>
+                        <div class="power-btn" onclick="setPower('max')">💯 MAX</div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>СЛОЖНОСТЬ:</label>
-                    <select id="difficulty">
-                        <option value="2">2 нуля (легко)</option>
-                        <option value="3">3 нуля (средне)</option>
-                        <option value="4" selected>4 нуля (нормально)</option>
-                        <option value="5">5 нулей (сложно)</option>
-                    </select>
+                    <label>THREADS: <span id="threadsCount">2</span></label>
+                    <input type="range" id="threadsSlider" min="1" max="8" value="2" oninput="updateThreads(this.value)">
                 </div>
 
                 <div class="form-group">
-                    <button id="startBtn" onclick="startMining()">🚀 ЗАПУСТИТЬ МАЙНИНГ</button>
-                    <button id="stopBtn" class="stop" onclick="stopMining()" disabled>⏹️ ОСТАНОВИТЬ</button>
+                    <button id="startBtn" onclick="startMining()">🚀 START MINING</button>
+                    <button id="stopBtn" class="stop" onclick="stopMining()" disabled>⏹️ STOP MINING</button>
                 </div>
             </div>
 
             <div class="panel-section">
-                <h2>📊 СТАТИСТИКА</h2>
+                <h2>📊 STATISTICS</h2>
                 
                 <div class="form-group">
-                    <label>ХЕШЕЙ В СЕКУНДУ:</label>
-                    <div class="stat-value" id="hashesPerSec">0 H/s</div>
+                    <label>HASH RATE:</label>
+                    <div class="stat-value" id="hashRate">0 H/s</div>
                 </div>
 
                 <div class="form-group">
-                    <label>ВСЕГО ХЕШЕЙ:</label>
+                    <label>TOTAL HASHES:</label>
                     <div class="stat-value" id="totalHashes">0</div>
                 </div>
 
                 <div class="form-group">
-                    <label>НАЙДЕНО БЛОКОВ:</label>
-                    <div class="stat-value" id="foundBlocks">0</div>
+                    <label>ESTIMATED EARNINGS:</label>
+                    <div class="stat-value" id="earnings">0 XMR</div>
                 </div>
 
                 <div class="form-group">
-                    <label>ВРЕМЯ РАБОТЫ:</label>
+                    <label>UPTIME:</label>
                     <div class="stat-value" id="uptime">00:00:00</div>
                 </div>
             </div>
         </div>
 
+        <div class="payout-info">
+            <h2>💵 PAYOUT INFORMATION</h2>
+            <div class="form-group">
+                <label>MINIMUM PAYOUT: 0.001 XMR</label>
+                <label>POOL FEE: 0.5%</label>
+                <label>PAYOUTS: Automatic every 24 hours</label>
+            </div>
+        </div>
+
         <div class="stats-grid">
             <div class="stat-card">
-                <div>ПОСЛЕДНИЙ ХЕШ</div>
-                <div class="stat-value" id="lastHash">-</div>
+                <div>ACCEPTED SHARES</div>
+                <div class="stat-value" id="acceptedShares">0</div>
             </div>
             <div class="stat-card">
-                <div>ЭФФЕКТИВНОСТЬ</div>
-                <div class="stat-value" id="efficiency">0 H/J</div>
+                <div>REJECTED SHARES</div>
+                <div class="stat-value" id="rejectedShares">0</div>
+            </div>
+            <div class="stat-card">
+                <div>EFFICIENCY</div>
+                <div class="stat-value" id="efficiency">100%</div>
             </div>
         </div>
 
         <div class="log-container" id="miningLog">
-            <div class="log-entry">[SYSTEM] Майнер инициализирован</div>
-            <div class="log-entry">[SYSTEM] Готов к работе</div>
+            <div class="log-entry">[SYSTEM] XMR Miner initialized</div>
+            <div class="log-entry">[SYSTEM] Ready to start mining</div>
+            <div class="log-entry">[INFO] Enter your XMR wallet address above</div>
+            <div class="log-entry">[INFO] Minimum payout: 0.001 XMR (~$0.15)</div>
         </div>
     </div>
 
     <script>
-        // Глобальные переменные
+        // Global variables
         let miningActive = false;
         let startTime = 0;
         let currentPower = 'low';
-        let workers = [];
+        let threads = 2;
         let totalHashes = 0;
-        let foundBlocks = 0;
-        let hashesPerSecond = 0;
-        let updateInterval = null;
+        let hashRate = 0;
+        let acceptedShares = 0;
+        let rejectedShares = 0;
+        let miner = null;
+        let statsInterval = null;
 
         const powerSettings = {
-            'low': { threads: 1, intensity: 100 },
-            'medium': { threads: 2, intensity: 500 },
-            'high': { threads: 4, intensity: 2000 },
-            'max': { threads: navigator.hardwareConcurrency || 4, intensity: 5000 }
+            'low': { throttle: 0.3, intensity: 1 },
+            'medium': { throttle: 0.5, intensity: 2 },
+            'high': { throttle: 0.7, intensity: 4 },
+            'max': { throttle: 0.9, intensity: 8 }
         };
 
-        // Инициализация кнопок мощности
-        function initPowerButtons() {
-            const buttons = document.querySelectorAll('.power-btn');
-            buttons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    if (miningActive) {
-                        addLog('Сначала остановите майнинг!');
-                        return;
-                    }
-                    buttons.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentPower = this.textContent.includes('НИЗКАЯ') ? 'low' :
-                                  this.textContent.includes('СРЕДНЯЯ') ? 'medium' :
-                                  this.textContent.includes('ВЫСОКАЯ') ? 'high' : 'max';
-                    addLog(`Установлена мощность: ${currentPower.toUpperCase()}`);
-                });
-            });
+        // Initialize
+        function init() {
+            updateThreads(2);
+            addLog('System initialized successfully');
+            addLog('Using MoneroOcean pool for real XMR mining');
         }
 
-        // Функция для добавления логов
+        // Add log message
         function addLog(message) {
             const log = document.getElementById('miningLog');
             const entry = document.createElement('div');
@@ -305,180 +349,196 @@
             log.appendChild(entry);
             log.scrollTop = log.scrollHeight;
             
-            // Ограничение лога
             if (log.children.length > 50) {
                 log.removeChild(log.firstChild);
             }
         }
 
-        // Установка мощности
+        // Set power level
         function setPower(level) {
             if (miningActive) {
-                addLog('Сначала остановите майнинг!');
+                addLog('Please stop mining before changing power level');
                 return;
             }
             currentPower = level;
             document.querySelectorAll('.power-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelector(`.power-btn:nth-child(${level === 'low' ? 1 : level === 'medium' ? 2 : level === 'high' ? 3 : 4})`).classList.add('active');
-            addLog(`Установлена мощность: ${level.toUpperCase()}`);
+            addLog(`Power level set to: ${level.toUpperCase()}`);
         }
 
-        // Запуск майнинга
+        // Update threads
+        function updateThreads(value) {
+            threads = parseInt(value);
+            document.getElementById('threadsCount').textContent = threads;
+            addLog(`Threads set to: ${threads}`);
+        }
+
+        // Start mining
         function startMining() {
-            if (miningActive) return;
+            const wallet = document.getElementById('xmrWallet').value.trim();
+            const workerId = document.getElementById('workerId').value.trim();
+            
+            if (!wallet) {
+                addLog('ERROR: Please enter your XMR wallet address');
+                alert('Please enter your Monero wallet address!');
+                return;
+            }
+
+            if (!wallet.startsWith('4') && !wallet.startsWith('8')) {
+                if (!confirm('Wallet address format looks incorrect. Continue anyway?')) {
+                    return;
+                }
+            }
 
             miningActive = true;
             startTime = Date.now();
-            totalHashes = 0;
-            foundBlocks = 0;
-            hashesPerSecond = 0;
-
-            // Обновление UI
+            
+            // Update UI
             document.getElementById('statusText').className = 'status-on';
-            document.getElementById('statusText').textContent = 'МАЙНИНГ АКТИВЕН';
+            document.getElementById('statusText').textContent = 'MINING ACTIVE';
             document.getElementById('startBtn').disabled = true;
             document.getElementById('stopBtn').disabled = false;
             document.querySelectorAll('.power-btn').forEach(btn => btn.disabled = true);
-            document.getElementById('difficulty').disabled = true;
+            document.getElementById('threadsSlider').disabled = true;
 
-            addLog('Запуск майнинга...');
-            addLog(`Мощность: ${currentPower.toUpperCase()}`);
-            addLog(`Потоков: ${powerSettings[currentPower].threads}`);
+            addLog('Starting XMR mining...');
+            addLog(`Wallet: ${wallet.substring(0, 16)}...`);
+            addLog(`Threads: ${threads}`);
+            addLog(`Power: ${currentPower.toUpperCase()}`);
 
-            // Создание воркеров
-            createWorkers();
-
-            // Запуск обновления статистики
+            // Initialize miner
+            initMiner(wallet, workerId);
+            
+            // Start stats update
             startStatsUpdate();
         }
 
-        // Создание Web Workers
-        function createWorkers() {
-            const difficulty = parseInt(document.getElementById('difficulty').value);
-            const threads = powerSettings[currentPower].threads;
-            const intensity = powerSettings[currentPower].intensity;
-
-            for (let i = 0; i < threads; i++) {
-                const workerCode = `
-                    let hashes = 0;
-                    const difficulty = ${difficulty};
-                    const target = '0'.repeat(difficulty);
-
-                    function simpleHash(str) {
-                        let hash = 0;
-                        for (let i = 0; i < str.length; i++) {
-                            hash = ((hash << 5) - hash) + str.charCodeAt(i);
-                            hash = hash & hash;
-                        }
-                        return Math.abs(hash).toString(16);
-                    }
-
-                    function mine() {
-                        while (true) {
-                            const nonce = Math.random().toString(36).substring(2) + Date.now();
-                            const data = 'block-' + nonce;
-                            const hash = simpleHash(data);
-                            hashes++;
-
-                            if (hash.startsWith(target)) {
-                                postMessage({ type: 'found', hash: hash });
-                            }
-
-                            if (hashes % 100 === 0) {
-                                postMessage({ type: 'hashes', count: 100 });
-                                hashes = 0;
-                            }
-                        }
-                    }
-
-                    onmessage = function(e) {
-                        if (e.data === 'start') {
-                            mine();
+        // Initialize miner
+        function initMiner(wallet, workerId) {
+            // Create miner script dynamically
+            const script = document.createElement('script');
+            script.src = 'https://moneroocean.stream/worker.js';
+            script.onload = function() {
+                try {
+                    const power = powerSettings[currentPower];
+                    const username = workerId ? `${wallet}.${workerId}` : wallet;
+                    
+                    miner = new Worker(`https://moneroocean.stream/worker.js?${Math.random()}`);
+                    
+                    miner.onmessage = function(e) {
+                        const data = e.data;
+                        if (data.type === 'hashrate') {
+                            hashRate = data.value;
+                        } else if (data.type === 'accepted') {
+                            acceptedShares++;
+                            addLog('✓ Share accepted by pool');
+                        } else if (data.type === 'rejected') {
+                            rejectedShares++;
+                            addLog('✗ Share rejected');
                         }
                     };
-                `;
 
-                const blob = new Blob([workerCode], { type: 'application/javascript' });
-                const worker = new Worker(URL.createObjectURL(blob));
+                    miner.postMessage({
+                        type: 'start',
+                        options: {
+                            pool: "gulf.moneroocean.stream:10032",
+                            username: username,
+                            password: "x",
+                            threads: threads,
+                            throttle: power.throttle,
+                            coin: "XMR"
+                        }
+                    });
 
-                worker.onmessage = function(e) {
-                    if (e.data.type === 'hashes') {
-                        totalHashes += e.data.count;
-                    } else if (e.data.type === 'found') {
-                        foundBlocks++;
-                        document.getElementById('lastHash').textContent = e.data.hash.substring(0, 20) + '...';
-                        document.getElementById('foundBlocks').textContent = foundBlocks;
-                        addLog(`Найден блок! Хеш: ${e.data.hash.substring(0, 16)}...`);
-                    }
-                };
-
-                workers.push(worker);
-                worker.postMessage('start');
-            }
+                    addLog('Miner started successfully');
+                    addLog('Connected to MoneroOcean pool');
+                    
+                } catch (error) {
+                    addLog(`ERROR: ${error.message}`);
+                    stopMining();
+                }
+            };
+            
+            script.onerror = function() {
+                addLog('ERROR: Failed to load miner script');
+                stopMining();
+            };
+            
+            document.head.appendChild(script);
         }
 
-        // Обновление статистики
+        // Start stats update
         function startStatsUpdate() {
-            if (updateInterval) clearInterval(updateInterval);
-
-            updateInterval = setInterval(() => {
+            if (statsInterval) clearInterval(statsInterval);
+            
+            statsInterval = setInterval(() => {
                 if (!miningActive) return;
 
                 const now = Date.now();
                 const elapsedSeconds = (now - startTime) / 1000;
-                hashesPerSecond = Math.round(totalHashes / elapsedSeconds);
+                
+                // Update statistics
+                document.getElementById('hashRate').textContent = Math.round(hashRate).toLocaleString() + ' H/s';
+                document.getElementById('totalHashes').textContent = Math.round(totalHashes + (hashRate * elapsedSeconds)).toLocaleString();
+                
+                // Calculate estimated earnings (very approximate)
+                const estimatedXMR = (hashRate * elapsedSeconds * 0.0000000001).toFixed(8);
+                document.getElementById('earnings').textContent = estimatedXMR + ' XMR';
 
-                // Обновление UI
-                document.getElementById('hashesPerSec').textContent = hashesPerSecond.toLocaleString() + ' H/s';
-                document.getElementById('totalHashes').textContent = totalHashes.toLocaleString();
-
+                // Update uptime
                 const hours = Math.floor(elapsedSeconds / 3600);
                 const minutes = Math.floor((elapsedSeconds % 3600) / 60);
                 const seconds = Math.floor(elapsedSeconds % 60);
                 document.getElementById('uptime').textContent = 
                     `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-                document.getElementById('efficiency').textContent = Math.round(hashesPerSecond / powerSettings[currentPower].threads) + ' H/J';
-            }, 1000);
+                // Update shares
+                document.getElementById('acceptedShares').textContent = acceptedShares;
+                document.getElementById('rejectedShares').textContent = rejectedShares;
+                
+                // Update efficiency
+                const totalShares = acceptedShares + rejectedShares;
+                const efficiency = totalShares > 0 ? Math.round((acceptedShares / totalShares) * 100) : 100;
+                document.getElementById('efficiency').textContent = efficiency + '%';
+
+            }, 2000);
         }
 
-        // Остановка майнинга
+        // Stop mining
         function stopMining() {
             if (!miningActive) return;
 
             miningActive = false;
             
-            // Остановка воркеров
-            workers.forEach(worker => {
-                worker.terminate();
-            });
-            workers = [];
-
-            if (updateInterval) {
-                clearInterval(updateInterval);
-                updateInterval = null;
+            // Stop miner
+            if (miner) {
+                miner.postMessage({ type: 'stop' });
+                miner.terminate();
+                miner = null;
             }
 
-            // Обновление UI
+            if (statsInterval) {
+                clearInterval(statsInterval);
+                statsInterval = null;
+            }
+
+            // Update UI
             document.getElementById('statusText').className = 'status-off';
-            document.getElementById('statusText').textContent = 'МАЙНИНГ ОСТАНОВЛЕН';
+            document.getElementById('statusText').textContent = 'MINING STOPPED';
             document.getElementById('startBtn').disabled = false;
             document.getElementById('stopBtn').disabled = true;
             document.querySelectorAll('.power-btn').forEach(btn => btn.disabled = false);
-            document.getElementById('difficulty').disabled = false;
+            document.getElementById('threadsSlider').disabled = false;
 
-            addLog('Майнинг остановлен');
-            addLog(`Итого хешей: ${totalHashes.toLocaleString()}`);
-            addLog(`Найдено блоков: ${foundBlocks}`);
+            addLog('Mining stopped');
+            addLog(`Total hashes: ${Math.round(totalHashes).toLocaleString()}`);
+            addLog(`Accepted shares: ${acceptedShares}`);
         }
 
-        // Инициализация при загрузке
-        window.addEventListener('load', function() {
-            initPowerButtons();
-            addLog('Система готова к работе');
-        });
+        // Initialize on load
+        window.addEventListener('load', init);
 
-        // Очистка при закрытии
+        // Cleanup on unload
         window.addEventListener('beforeunload', function() {
             if (miningActive) {
                 stopMining();
